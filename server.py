@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify
 import base64, cv2, numpy as np
-import pytesseract
+import easyocr
+
+# 📘 EasyOCR initialisieren (nur Englisch)
+reader = easyocr.Reader(['en'], gpu=False)
 
 app = Flask(__name__)
 
@@ -19,17 +22,20 @@ def recognize_plate():
         # Vorverarbeitung
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.bilateralFilter(gray, 11, 17, 17)
-        edged = cv2.Canny(gray, 30, 200)
 
-        # OCR mit Tesseract
-        text = pytesseract.image_to_string(gray, lang='eng')
-        text = text.strip()
+        # OCR mit EasyOCR
+        results = reader.readtext(gray)
+        text = " ".join([res[1] for res in results]).strip()
 
-        print("Detected plate text:", text)
-        return jsonify({'plate': text})
+        print("✅ Detected plate text:", text)
+        return jsonify({'plate': text or "unbekannt"})
     except Exception as e:
         print("❌ Error:", e)
         return jsonify({'error': str(e)}), 500
+
+@app.route('/', methods=['GET'])
+def home():
+    return "SmartPark AI Server is running ✅", 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

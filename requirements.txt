@@ -1,4 +1,4 @@
 flask
-pytesseract
+easyocr
 opencv-python-headless
 numpy
