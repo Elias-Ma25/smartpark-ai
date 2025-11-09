@@ -1,4 +1,4 @@
 flask
-easyocr
+paddleocr
 opencv-python-headless
 numpy
